@@ -1,76 +1,56 @@
 import React from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
+import './App.css';
 
-const RegistrationForm = () => {
-  const validationSchema = Yup.object({
-    username: Yup.string().required("Ім'я користувача є обов'язковим"),
+const FeedbackForm = () => {
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required("Ім'я є обов'язковим"),
     email: Yup.string()
       .email("Неправильний формат електронної пошти")
       .required("Електронна пошта є обов'язковою"),
-    password: Yup.string()
-      .min(6, "Пароль має містити щонайменше 6 символів")
-      .required("Пароль є обов'язковим"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password"), null], "Паролі не співпадають")
-      .required("Підтвердження пароля є обов'язковим"),
+    message: Yup.string()
+      .min(10, "Повідомлення має містити щонайменше 10 символів")
+      .required("Повідомлення є обов'язковим"),
   });
 
-  const initialValues = {
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  });
 
-  const onSubmit = (values) => {
-    console.log("Submitted Data:", values);
+  const onSubmit = (data) => {
+    console.log("Submitted Data:", data);
   };
 
   return (
     <div className="container">
-      <h1>Реєстрація</h1>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={onSubmit}
-      >
-        <Form>
-          <div className="form-group">
-            <label htmlFor="username">Ім'я користувача</label>
-            <Field type="text" id="username" name="username" />
-            <ErrorMessage name="username" component="div" className="error" />
-          </div>
+      <h1>Форма зворотного зв'язку</h1>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="form-group">
+          <label htmlFor="name">Ім'я</label>
+          <input id="name" type="text" {...register("name")} />
+          <p className="error">{errors.name?.message}</p>
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Електронна пошта</label>
-            <Field type="email" id="email" name="email" />
-            <ErrorMessage name="email" component="div" className="error" />
-          </div>
+        <div className="form-group">
+          <label htmlFor="email">Електронна пошта</label>
+          <input id="email" type="email" {...register("email")} />
+          <p className="error">{errors.email?.message}</p>
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Пароль</label>
-            <Field type="password" id="password" name="password" />
-            <ErrorMessage name="password" component="div" className="error" />
-          </div>
+        <div className="form-group">
+          <label htmlFor="message">Повідомлення</label>
+          <textarea id="message" rows="4" {...register("message")}></textarea>
+          <p className="error">{errors.message?.message}</p>
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Підтвердження пароля</label>
-            <Field
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-            />
-            <ErrorMessage
-              name="confirmPassword"
-              component="div"
-              className="error"
-            />
-          </div>
-
-          <button type="submit">Зареєструватися</button>
-        </Form>
-      </Formik>
+        <button type="submit">Відправити</button>
+      </form>
     </div>
   );
 };
@@ -78,7 +58,7 @@ const RegistrationForm = () => {
 function App() {
   return (
     <div className="App">
-      <RegistrationForm />
+      <FeedbackForm />
     </div>
   );
 }
